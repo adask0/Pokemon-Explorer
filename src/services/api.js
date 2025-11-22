@@ -29,8 +29,8 @@ export const typeColors = {
   fairy: "#D685AD",
 };
 
-export const getAllPokemon = (limit = 999, offset = 0) => {
-  return api.get(`/pokemon?limit=${limit}&offset=${offset}`);
+export const getAllPokemon = (limit, offset) => {
+  return api.get(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`);
 };
 
 export const getPokemon = (nameOrId) => {
@@ -41,7 +41,7 @@ export const getAllTypes = () => {
   return api.get("/type");
 };
 
-export const getPokemonDetails = async (limit = 20, offset = 0) => {
+export const getPokemonDetails = async (limit, offset) => {
   try {
     const listResponse = await getAllPokemon(limit, offset);
     const pokemonList = listResponse.data.results;
@@ -52,6 +52,7 @@ export const getPokemonDetails = async (limit = 20, offset = 0) => {
 
     return detailedPokemon.map((response) => {
       const data = response.data;
+      console.log(data)
       return {
         id: data.id,
         name: data.name,

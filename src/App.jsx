@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAllPokemon, getAllTypes } from "./services/api";
+import { getAllPokemon, getAllTypes, getPokemonDetails } from "./services/api";
 import PokemonItem from "./services/PokemonItem";
 import pokeBall from "./assets/poke-ball.png";
 import "./App.css";
@@ -8,24 +8,25 @@ function App() {
   const [allPokemons, setAllPokemons] = useState([]);
   const [pokemons, setPokemons] = useState([]);
   const [types, setTypes] = useState([]);
+  const [pokemonDetails, setPokemonDetails] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pokemonLimit, setPokemonLimit] = useState(6);
+  const [limit, setLimit] = useState(6);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const pokemonResponse = await getAllPokemon();
-        console.log("All Pokemon:", pokemonResponse.data);
+        const pokemonResponse = await getAllPokemon(limit);
         setAllPokemons(pokemonResponse.data.results);
         setPokemons(pokemonResponse.data.results);
+        const details = await getPokemonDetails(limit);
+        setPokemonDetails(details);
+        setLoading(false);
 
         const typesResponse = await getAllTypes();
-        console.log("All Types:", typesResponse.data);
         setTypes(typesResponse.data.results);
 
         setLoading(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
@@ -46,12 +47,16 @@ function App() {
     }
   };
 
+  const pokemonId = (id) => {
+    return id.toString().padStart(3, "0");
+  };
+
   const loadMorePokemons = () => {
-    setPokemonLimit((prevLimit) => prevLimit + 6);
+    setLimit((prevLimit) => prevLimit + 6);
   };
 
   const loadLessPokemons = () => {
-    setPokemonLimit((prevLimit) => Math.max(prevLimit - 6, 6));
+    setLimit((prevLimit) => Math.max(prevLimit - 6, 6));
   };
 
   if (loading) {
@@ -86,7 +91,7 @@ function App() {
             backgroundClip: "text",
             fontSize: "2.3rem",
             textAlign: "center",
-            margin: "0 auto auto 0",
+            margin: "auto auto auto 0",
           }}
         >
           Pokemon Explorer
@@ -98,13 +103,35 @@ function App() {
         placeholder="Search Pokemon..."
       />
       <div className="pokemon-grid">
-        {pokemons.slice(0, pokemonLimit).map((pokemon) => (
-          <PokemonItem key={pokemon.name} limit={pokemonLimit} />
+        {pokemonDetails.slice(0, limit).map((pokemon) => (
+          <div
+            key={pokemon.id}
+            style={{ backgroundColor: pokemon.types[0].color }}
+          >
+            <img src={pokemon.sprite} alt={pokemon.name} />
+            <h3>{pokemon.name}</h3>
+            <p style={{ fontWeight: "500" }}>#{pokemonId(pokemon.id)}</p>
+            <div>
+              {pokemon.types.map((type) => (
+                <span
+                  key={type.name}
+                  style={{
+                    backgroundColor: "rgba(0, 0, 0, 0.2)",
+                    padding: "0.7rem 1.2rem",
+                    borderRadius: "25px",
+                    textTransform: "uppercase",
+                    fontWeight: "600",
+                    margin: "0 1rem",
+                  }}
+                >
+                  {type.name}
+                </span>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
-      {pokemonLimit > 6 && (
-        <button onClick={loadLessPokemons}>Load Less</button>
-      )}
+      {limit > 6 && <button onClick={loadLessPokemons}>Load Less</button>}
       <button onClick={loadMorePokemons}>Load More</button>
     </div>
   );

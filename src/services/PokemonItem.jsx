@@ -1,36 +1,14 @@
 import { useState, useEffect } from "react";
 import { getPokemonDetails } from "./api";
 
-export default function PokemonItem({ limit }) {
-  const [pokemonDetails, setPokemonDetails] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const details = await getPokemonDetails(limit);
-        setPokemonDetails(details);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching pokemon details:", error);
-        setLoading(false);
-      }
-    };
-
-    fetchDetails();
-  }, [limit]);
-
+export default function PokemonItem(poke) {
   const pokemonId = (id) => {
     return id.toString().padStart(3, "0");
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <div>
-      {pokemonDetails.map((pokemon) => (
+      {poke.map((pokemon) => (
         <div
           key={pokemon.id}
           style={{ backgroundColor: pokemon.types[0].color }}
